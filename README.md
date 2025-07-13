@@ -4,7 +4,7 @@
 
 **Включает в себя схему оптопорта и модуль от `Tuya ZTU`**
 
-[Repository electricity_meter_zrd](https://github.com/slacky1965/electricity_meter_abc_zrd)
+[Repository electricity_meter_abc_zrd](https://github.com/slacky1965/electricity_meter_abc_zrd)
 
 ---
 
@@ -277,7 +277,7 @@
 В настоящий момент устройство может прочитать из счетчика:
 
 * 4 тарифа (в kWh)
-* силу тока по трем фазам и нейтраль(в A)
+* силу тока по трем фазам и нейтраль (в A)
 * напряжение сети по трем фазам (в V)
 * мощность по трем фазам (в kW)
 * оставшийся ресурс батареи прибора (косвенно вычисляется, команды такой нет, в %)
