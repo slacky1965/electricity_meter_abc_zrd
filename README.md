@@ -105,8 +105,6 @@
 
 <img src="doc/images/box/box_common.jpg"/>
 
-<img src="doc/images/box/box_common_e180.jpg"/>
-
 [STL файл основания](doc/production/ElectricityMeter_Main.STL)
 
 [STL файл крышки](doc/production/ElectricityMeter_Cover.STL)
