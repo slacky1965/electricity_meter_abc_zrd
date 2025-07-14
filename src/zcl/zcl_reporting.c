@@ -599,7 +599,7 @@ _CODE_ZCL_ void reportAttrs(void) {
                         } else {
                             valid = 1;
                         }
-                    } else if (!pEntry->minIntCnt /* && pEntry->minInterval*/) {
+                    } else if (!pEntry->minIntCnt) {
                         if ((!zcl_analogDataType(pAttrEntry->type) && memcmp(pEntry->prevData, pAttrEntry->data, dataLen)) ||
                              (zcl_analogDataType(pAttrEntry->type) && reportableChangeValueChk(pAttrEntry->type,
                                                                                                pAttrEntry->data,
