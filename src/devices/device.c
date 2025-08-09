@@ -54,7 +54,7 @@ uint8_t set_device_model(device_model_t model) {
             energy_divisor = 1000;
             voltage_divisor = 100;
             current_divisor = 1000;
-            power_divisor = 1000;
+            power_divisor = 1;
 
             if (set_zcl_str(device_model[DEVICE_NARTIS_I300], name, DEVICE_NAME_LEN)) {
                 zcl_setAttrVal(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_CUSTOM_DEVICE_MODEL, (uint8_t*)&name);
