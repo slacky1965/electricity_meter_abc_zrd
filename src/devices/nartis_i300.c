@@ -1042,7 +1042,7 @@ static void get_power_data() {
 
         if (digit_powerA->type == TYPE_UNSIGNED_32 || digit_powerA->type == TYPE_SIGNED_32) {
 
-            power = reverse32(digit_powerA->value) / 1000;
+            power = reverse32(digit_powerA->value); // / 1000;
 
             //power = 42258; //1505010; //
             //power /= 1000;
@@ -1202,10 +1202,15 @@ static void get_time_data() {
 static uint32_t get_tariffA(request_t *attr_desc) {
 
     uint64_t tariff = 0;
-    type_digit64_t *tariff_A = (type_digit64_t*)get_request_data(attr_desc);
+    type_digit64_t *tariff_A64 = (type_digit64_t*)get_request_data(attr_desc);
+    type_digit32_t *tariff_A32 = (type_digit32_t*)tariff_A64;
 
-    if (tariff_A->type == TYPE_UNSIGNED_64) {
-        tariff = reverse64(tariff_A->value);
+    if (tariff_A64) {
+        if (tariff_A64->type == TYPE_UNSIGNED_64) {
+            tariff = reverse64(tariff_A64->value);
+        } else if (tariff_A32->type == TYPE_SIGNED_32 || tariff_A32->type == TYPE_UNSIGNED_32) {
+            tariff = reverse32(tariff_A32->value);
+        }
     }
 
     return tariff;
