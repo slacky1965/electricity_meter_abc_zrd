@@ -1063,7 +1063,7 @@ static void get_power_data() {
 
         if (digit_powerB->type == TYPE_UNSIGNED_32 || digit_powerB->type == TYPE_SIGNED_32) {
 
-            power = reverse32(digit_powerB->value) / 1000;
+            power = reverse32(digit_powerB->value); // / 1000;
 
             //power = 42258; //1505010; //
             //power /= 1000;
@@ -1084,7 +1084,7 @@ static void get_power_data() {
 
         if (digit_powerC->type == TYPE_UNSIGNED_32 || digit_powerC->type == TYPE_SIGNED_32) {
 
-            power = reverse32(digit_powerC->value) / 1000;
+            power = reverse32(digit_powerC->value); // / 1000;
 
             //power = 42258; //1505010; //
             //power /= 1000;
