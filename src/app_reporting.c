@@ -1,31 +1,277 @@
 #include "app_main.h"
 
-void app_all_forceReporting(void *args) {
+struct report_t {
+    u8 numAttr;
+    zclReport_t attr[11];
+};
 
-    if (zb_isDeviceJoinedNwk()) {
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_CUSTOM_DEVICE_MODEL);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_GEN_DEVICE_TEMP_CONFIG, ZCL_ATTRID_DEV_TEMP_CURR_TEMP);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_METER_SERIAL_NUMBER);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_CUSTOM_DATE_RELEASE);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_MULTIPLIER);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_DIVISOR);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_CURRENT_SUMMATION_DELIVERD);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_CURRENT_TIER_1_SUMMATION_DELIVERD);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_CURRENT_TIER_2_SUMMATION_DELIVERD);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_CURRENT_TIER_3_SUMMATION_DELIVERD);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_CURRENT_TIER_4_SUMMATION_DELIVERD);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT, ZCL_ATTRID_AC_VOLTAGE_MULTIPLIER);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT, ZCL_ATTRID_AC_VOLTAGE_DIVISOR);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT, ZCL_ATTRID_RMS_VOLTAGE);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT, ZCL_ATTRID_AC_POWER_MULTIPLIER);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT, ZCL_ATTRID_AC_POWER_DIVISOR);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT, ZCL_ATTRID_ACTIVE_POWER);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT, ZCL_ATTRID_AC_CURRENT_MULTIPLIER);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT, ZCL_ATTRID_AC_CURRENT_DIVISOR);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT, ZCL_ATTRID_RMS_CURRENT);
-        app_forcedReport(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_REMAINING_BATTERY_LIFE);
+static struct report_t report;
+
+static void app_forceReportingMetering2(void *args) {
+
+    epInfo_t dstEpInfo;
+    TL_SETSTRUCTCONTENT(dstEpInfo, 0);
+
+    dstEpInfo.profileId = HA_PROFILE_ID;
+    dstEpInfo.dstAddrMode = APS_DSTADDR_EP_NOTPRESETNT;
+
+    report.numAttr = 0;
+
+    zclAttrInfo_t *pAttrEntry;
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_CUSTOM_DEVICE_MODEL);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
     }
 
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_METER_SERIAL_NUMBER);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_CUSTOM_DATE_RELEASE);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    if (report.numAttr) {
+        zcl_sendReportAttrsCmd(APP_ENDPOINT_1,
+                               &dstEpInfo,
+                               TRUE,
+                               ZCL_FRAME_SERVER_CLIENT_DIR,
+                               ZCL_CLUSTER_SE_METERING,
+                               (zclReportCmd_t* )&report);
+    }
+}
+
+static void app_forceReportingMetering(void *args) {
+
+    epInfo_t dstEpInfo;
+    TL_SETSTRUCTCONTENT(dstEpInfo, 0);
+
+    dstEpInfo.profileId = HA_PROFILE_ID;
+    dstEpInfo.dstAddrMode = APS_DSTADDR_EP_NOTPRESETNT;
+
+    report.numAttr = 0;
+
+    zclAttrInfo_t *pAttrEntry;
+
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_MULTIPLIER);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_DIVISOR);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_CURRENT_SUMMATION_DELIVERD);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_CURRENT_TIER_1_SUMMATION_DELIVERD);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_CURRENT_TIER_2_SUMMATION_DELIVERD);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_CURRENT_TIER_3_SUMMATION_DELIVERD);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_CURRENT_TIER_4_SUMMATION_DELIVERD);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_SE_METERING, ZCL_ATTRID_REMAINING_BATTERY_LIFE);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    if (report.numAttr) {
+        zcl_sendReportAttrsCmd(APP_ENDPOINT_1,
+                               &dstEpInfo,
+                               TRUE,
+                               ZCL_FRAME_SERVER_CLIENT_DIR,
+                               ZCL_CLUSTER_SE_METERING,
+                               (zclReportCmd_t* )&report);
+    }
+}
+
+static void app_forceReportingElectrical(void *args) {
+
+    epInfo_t dstEpInfo;
+    TL_SETSTRUCTCONTENT(dstEpInfo, 0);
+
+    dstEpInfo.profileId = HA_PROFILE_ID;
+    dstEpInfo.dstAddrMode = APS_DSTADDR_EP_NOTPRESETNT;
+
+    report.numAttr = 0;
+
+    zclAttrInfo_t *pAttrEntry;
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT, ZCL_ATTRID_AC_VOLTAGE_MULTIPLIER);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT, ZCL_ATTRID_AC_VOLTAGE_DIVISOR);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT, ZCL_ATTRID_RMS_VOLTAGE);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT, ZCL_ATTRID_AC_POWER_MULTIPLIER);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT, ZCL_ATTRID_AC_POWER_DIVISOR);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT, ZCL_ATTRID_ACTIVE_POWER);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT, ZCL_ATTRID_AC_CURRENT_MULTIPLIER);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT, ZCL_ATTRID_AC_CURRENT_DIVISOR);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT, ZCL_ATTRID_RMS_CURRENT);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    if (report.numAttr) {
+        zcl_sendReportAttrsCmd(APP_ENDPOINT_1,
+                               &dstEpInfo,
+                               TRUE,
+                               ZCL_FRAME_SERVER_CLIENT_DIR,
+                               ZCL_CLUSTER_MS_ELECTRICAL_MEASUREMENT,
+                               (zclReportCmd_t* )&report);
+    }
+}
+
+static void app_forceReportingDevTemperature(void *args) {
+
+    epInfo_t dstEpInfo;
+    TL_SETSTRUCTCONTENT(dstEpInfo, 0);
+
+    dstEpInfo.profileId = HA_PROFILE_ID;
+    dstEpInfo.dstAddrMode = APS_DSTADDR_EP_NOTPRESETNT;
+
+    report.numAttr = 0;
+
+    zclAttrInfo_t *pAttrEntry;
+
+    pAttrEntry = zcl_findAttribute(APP_ENDPOINT_1, ZCL_CLUSTER_GEN_DEVICE_TEMP_CONFIG, ZCL_ATTRID_DEV_TEMP_CURR_TEMP);
+    if (pAttrEntry) {
+        report.attr[report.numAttr].attrID = pAttrEntry->id;
+        report.attr[report.numAttr].dataType = pAttrEntry->type;
+        report.attr[report.numAttr].attrData = pAttrEntry->data;
+        report.numAttr++;
+    }
+
+    if (report.numAttr) {
+        zcl_sendReportAttrsCmd(APP_ENDPOINT_1,
+                               &dstEpInfo,
+                               TRUE,
+                               ZCL_FRAME_SERVER_CLIENT_DIR,
+                               ZCL_CLUSTER_GEN_DEVICE_TEMP_CONFIG,
+                               (zclReportCmd_t* )&report);
+    }
+}
+
+static void app_all_forceReporting() {
+
+    if (zb_isDeviceJoinedNwk()) {
+        TL_SCHEDULE_TASK(app_forceReportingMetering, NULL);
+        TL_SCHEDULE_TASK(app_forceReportingMetering2, NULL);
+        TL_SCHEDULE_TASK(app_forceReportingElectrical, NULL);
+        TL_SCHEDULE_TASK(app_forceReportingDevTemperature, NULL);
+    }
 }
 
 void app_forcedReport(uint8_t endpoint, uint16_t claster_id, uint16_t attr_id) {
@@ -64,7 +310,7 @@ void app_forcedReport(uint8_t endpoint, uint16_t claster_id, uint16_t attr_id) {
 
 int32_t forcedReportCb(void *arg) {
 
-    TL_SCHEDULE_TASK(app_all_forceReporting, NULL);
+    app_all_forceReporting();
 
     return -1;
 }

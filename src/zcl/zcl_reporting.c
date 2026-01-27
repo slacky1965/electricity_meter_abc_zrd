@@ -39,15 +39,16 @@ zcl_reportingTab_t reportingTab;
  * LOCAL VARIABLES
  */
 ev_timer_event_t *reportAttrTimerEvt = NULL;
-static uint8_t counter_delivered_multdiv = 0;
-static uint8_t counter_current_multdiv = 0;
-static uint8_t counter_power_multdiv = 0;
-static uint8_t counter_voltage_multdiv = 0;
+//static uint8_t counter_delivered_multdiv = 0;
+//static uint8_t counter_current_multdiv = 0;
+//static uint8_t counter_power_multdiv = 0;
+//static uint8_t counter_voltage_multdiv = 0;
 
 /**********************************************************************
  * FUNCTIONS
  */
 
+#if 0
 static void report_divisor_multiplier(uint8_t endpoint, uint16_t clusterID, uint16_t profileID, zclReportCmd_t *report) {
 
     //force report for multiplier and divisor
@@ -193,7 +194,7 @@ static void report_divisor_multiplier(uint8_t endpoint, uint16_t clusterID, uint
         }
     }
 }
-
+#endif
 
 
 /*********************************************************************
@@ -654,7 +655,7 @@ _CODE_ZCL_ void reportAttrs(void) {
             dstEpInfo.profileId = profileID;
 
 //            printf("Test\r\n");
-            report_divisor_multiplier(endpoint, clusterID, profileID, (zclReportCmd_t*)&report);
+//            report_divisor_multiplier(endpoint, clusterID, profileID, (zclReportCmd_t*)&report);
 
             zcl_sendReportAttrsCmd(endpoint, &dstEpInfo, TRUE, ZCL_FRAME_SERVER_CLIENT_DIR, clusterID, (zclReportCmd_t* )&report);
         }
