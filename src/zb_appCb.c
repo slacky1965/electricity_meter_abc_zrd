@@ -71,6 +71,7 @@ uint32_t heartInterval = 0;
 #if DEBUG_HEART
 ev_timer_event_t *heartTimerEvt = NULL;
 #endif
+ev_timer_event_t *steerTimerEvt = NULL;
 
 /**********************************************************************
  * FUNCTIONS
@@ -129,7 +130,7 @@ void zb_bdbInitCb(uint8_t status, uint8_t joinedNetwork){
 #ifdef ZCL_OTA
 			ota_queryStart(OTA_PERIODIC_QUERY_INTERVAL);
 #endif
-		} else if (g_appCtx.net_steer_start) {
+		} else {
 			heartInterval = 500;
 
             device_online = false;
@@ -139,7 +140,11 @@ void zb_bdbInitCb(uint8_t status, uint8_t joinedNetwork){
 			do{
 				jitter = zb_random() % 0x0fff;
 			}while(jitter == 0);
-			TL_ZB_TIMER_SCHEDULE(app_bdbNetworkSteerStart, NULL, jitter);
+
+			if (steerTimerEvt) {
+                TL_ZB_TIMER_CANCEL(&steerTimerEvt);
+            }
+            steerTimerEvt = TL_ZB_TIMER_SCHEDULE(app_bdbNetworkSteerStart, NULL, jitter);
 #endif
 		}
 	}else{
@@ -195,13 +200,17 @@ void zb_bdbCommissioningCb(uint8_t status, void *arg){
 		case BDB_COMMISSION_STA_NO_NETWORK:
 		case BDB_COMMISSION_STA_TCLK_EX_FAILURE:
 		case BDB_COMMISSION_STA_TARGET_FAILURE:
-		    if (g_appCtx.net_steer_start) {
+		    {
 		        uint16_t jitter = 0;
 	            device_online = false;
 				do{
 					jitter = zb_random() % 0x2710;
 				}while(jitter < 5000);
-				TL_ZB_TIMER_SCHEDULE(app_bdbNetworkSteerStart, NULL, jitter);
+
+	            if (steerTimerEvt) {
+	                TL_ZB_TIMER_CANCEL(&steerTimerEvt);
+	            }
+	            steerTimerEvt = TL_ZB_TIMER_SCHEDULE(app_bdbNetworkSteerStart, NULL, jitter);
 			}
 			break;
 		case BDB_COMMISSION_STA_FORMATION_FAILURE:
@@ -267,59 +276,6 @@ void app_otaProcessMsgHandler(uint8_t evt, uint8_t status) {
 		}
 	}
 }
-
-//extern ota_clientInfo_t otaClientInfo;
-//
-//void app_otaProcessMsgHandler(uint8_t evt, uint8_t status) {
-//    printf("app_otaProcessMsgHandler: status = %x\r\n", status);
-//    if (evt == OTA_EVT_START) {
-//        if (status == ZCL_STA_SUCCESS) {
-//
-//#if UART_PRINTF_MODE && DEBUG_OTA
-//            printf("OTA update start.\r\n");
-//#endif /* UART_PRINTF_MODE */
-//
-//            dev_config.new_ota = true;
-//            write_config();
-//
-//        } else {
-//
-//        }
-//    } else if (evt == OTA_EVT_COMPLETE) {
-//
-//        if (status == ZCL_STA_SUCCESS) {
-//
-//#if UART_PRINTF_MODE && DEBUG_OTA
-//            printf("OTA update successful.\r\n");
-//#endif /* UART_PRINTF_MODE */
-//
-//            ota_mcuReboot();
-//
-//        } else {
-//
-//#if UART_PRINTF_MODE && DEBUG_OTA
-//            printf("OTA update failure. Try again.\r\n");
-//#endif /* UART_PRINTF_MODE */
-//
-//            /* reset update OTA */
-//            nv_resetModule(NV_MODULE_OTA);
-//
-//            memset((uint8_t*) &otaClientInfo, 0, sizeof(otaClientInfo));
-//            otaClientInfo.clientOtaFlg = OTA_FLAG_INIT_DONE;
-//            otaClientInfo.crcValue = 0xffffffff;
-//
-//            zcl_attr_imageTypeID = 0xffff;
-//            zcl_attr_fileOffset = 0xffffffff;
-//            zcl_attr_downloadFileVer = 0xffffffff;
-//
-//            /* restore config */
-//            init_config(false);
-//
-//            ota_queryStart(OTA_PERIODIC_QUERY_INTERVAL);
-//        }
-//    }
-//}
-
 #endif
 
 int32_t app_softReset(void *arg){
@@ -340,10 +296,23 @@ int32_t app_softReset(void *arg){
 void app_leaveCnfHandler(nlme_leave_cnf_t *pLeaveCnf)
 {
     if(pLeaveCnf->status == SUCCESS){
-    	light_blink_start(3, 200, 200);
+        zb_deviceFactoryNewSet(true);
 
-    	//waiting blink over
-    	TL_ZB_TIMER_SCHEDULE(app_softReset, NULL, 2 * 1000);
+        heartInterval = 500;
+
+#if (!ZBHCI_EN)
+        uint16_t jitter = 0;
+        do {
+            jitter = zb_random() % 0x0fff;
+        } while (jitter == 0);
+
+        if (steerTimerEvt) {
+            TL_ZB_TIMER_CANCEL(&steerTimerEvt);
+        }
+        steerTimerEvt = TL_ZB_TIMER_SCHEDULE(app_bdbNetworkSteerStart, NULL, jitter);
+#endif
+
+        if (!g_appCtx.net_steer_start) light_blink_start(90, 250, 750);
     }
 }
 
