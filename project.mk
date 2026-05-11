@@ -2,7 +2,8 @@
 OUT_DIR += \
 /$(SRC_PATH) \
 /$(SRC_PATH)/common \
-/$(SRC_PATH)/devices
+/$(SRC_PATH)/devices \
+/$(SRC_PATH)/zcl
  
 OBJS += \
 $(OUT_PATH)/$(SRC_PATH)/common/main.o \
