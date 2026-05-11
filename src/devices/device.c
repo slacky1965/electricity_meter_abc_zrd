@@ -47,8 +47,6 @@ uint8_t set_device_model(device_model_t model) {
 
     switch (model) {
         case DEVICE_NARTIS_I300: {
-            /* reset password when changing model */
-            dev_config.device_password.size = 0;
             nartis_i300_init();
             measure_meter = measure_meter_nartis_i300;
             baudrate = 9600;
